@@ -12,40 +12,40 @@ response=requests.get(wikiurl)
 
 #Parse data from html into a beautifulsoup object
 soup = BeautifulSoup(response.text, 'html.parser')
-SnP500tbl = soup.find('table',{'class':"wikitable"},{'id':'constituents'})
+snp500tbl = soup.find('table',{'class':"wikitable"},{'id':'constituents'})
 
 #Convert wiki table into python data frame
-SnP500df = pd.read_html((str(SnP500tbl)))
-SnP500df = pd.DataFrame(SnP500df[0])
+snp500df = pd.read_html((str(snp500tbl)))
+snp500df = pd.DataFrame(snp500df[0])
 
-#Clean up periods in symbols to match yfinance format
-SnP500list = SnP500df['Symbol'].tolist()
-SnP500list = [ticker.replace('.','-') if '.' in ticker else ticker for ticker in SnP500list ]
+#replace . in symbols with - to match yfinance format
+snp500list = snp500df['Symbol'].tolist()
+snp500list = [ticker.replace('.','-') if '.' in ticker else ticker for ticker in snp500list ]
 
-df_list = list()
-for ticker in SnP500list:
-    data = yf.download(ticker, period="ytd",interval='1d', group_by="Ticker")
-    data['ticker'] = ticker  # add this column because the dataframe doesn't contain a column with the ticker
-    df_list.append(data)
-
-# combine all dataframes into a single dataframe
-stockPriceData = pd.concat(df_list)
-print(stockPriceData)
-
-#grab market cap data
-df_list = list()
-for ticker in SnP500list:
-    data = pdr.get_quote_yahoo(ticker)
-    data['AsOfDataTime'] = datetime.now()
-    df_list.append(data)
+priceDataList = list()
+quoteDataList = list() 
+for ticker in snp500list:
+    #Getting YTD price data for each ticker in the list of snp500 tickers
+    priceData = yf.download(ticker, period="ytd",interval='1d', group_by="Ticker")
+    priceData['ticker'] = ticker  # add this column because the dataframe doesn't contain a column with the ticker
+    priceDataList.append(priceData)
+    
+    #Getting current yahoo quote data from pandas data reader to bring in additionally data about the company
+    quoteData = pdr.get_quote_yahoo(ticker)
+    quoteData['AsOfDataTime'] = datetime.now()
+    quoteDataList.append(quoteData)
 
 # combine all dataframes into a single dataframe
-yahooQuoteData = pd.concat(df_list)
-yahooQuoteData = yahooQuoteData.rename_axis('ticker')
-print(yahooQuoteData)
+stockPriceDataDf = pd.concat(priceDataList)
+quoteDataDf = pd.concat(quoteDataList)
+
+#adding name data frame index
+quoteDataDf = quoteDataDf.rename_axis('ticker') 
 
 #Export dataframes to csv
-yahooQuoteData.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\StockMarketCapData.CSV', index = True, header=True, sep=";")
-stockPriceData.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\StockPriceData.CSV', index = True, header=True, sep=";")
-SnP500df.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\SnP500Stocks.CSV', index = False, header=True, sep=";")
+snp500df.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\SnP500Stocks.CSV', index = False, header=True, sep=";")
+stockPriceDataDf.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\PriceData.CSV', index = True, header=True, sep=";")
+quoteDataDf.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\QuoteData.CSV', index = True, header=True, sep=";")
+
+
 
