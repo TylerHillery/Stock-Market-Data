@@ -5,6 +5,8 @@ import yfinance as yf
 import requests
 from bs4 import BeautifulSoup
 import pandas_datareader as pdr 
+from google.cloud import storage
+import os
 
 #Get a list of the active S&P 500 Companies
 wikiurl = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
@@ -42,10 +44,13 @@ quoteDataDf = pd.concat(quoteDataList)
 #adding name data frame index
 quoteDataDf = quoteDataDf.rename_axis('ticker') 
 
-#Export dataframes to csv
-snp500df.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\SnP500Stocks.CSV', index = False, header=True, sep=";")
-stockPriceDataDf.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\PriceData.CSV', index = True, header=True, sep=";")
-quoteDataDf.to_csv(r'C:\Users\Tyler\Documents\Projects\yFinance\QuoteData.CSV', index = True, header=True, sep=";")
+#Export dataframes as csv to google cloud storage
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'credentials\airbyte_credentials.json' # Only need this if you're running this code locally.
 
-
+client = storage.Client()
+bucket = client.get_bucket('yfinance_stock_data')
+    
+bucket.blob('data_sync/SnP500Companies.csv').upload_from_string(snp500df.to_csv(index=False,sep=';',header=True), 'text/csv')
+bucket.blob('data_sync/PriceData.csv').upload_from_string(stockPriceDataDf.to_csv(index=True,sep=';',header=True), 'text/csv')
+bucket.blob('data_sync/QuoteData.csv').upload_from_string(stockPriceDataDf.to_csv(index=True,sep=';',header=True), 'text/csv')
 

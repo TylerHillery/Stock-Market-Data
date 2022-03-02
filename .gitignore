@@ -2,3 +2,4 @@
 test.ipynb
 *.csv
 airbyte/
+credentials/
