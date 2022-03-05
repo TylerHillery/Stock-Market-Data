@@ -1,0 +1,30 @@
+scheduler:
+  module: dagster.core.scheduler
+  class: DagsterDaemonScheduler
+
+run_coordinator:
+  module: dagster.core.run_coordinator
+  class: QueuedRunCoordinator
+  
+run_launcher:
+  module: dagster.core.launcher
+  class: DefaultRunLauncher
+
+run_storage:
+  module: dagster.core.storage.runs
+  class: SqliteRunStorage
+  config:
+    base_dir: C:\Users\Tyler\Documents\Projects\yFinance\history
+
+event_log_storage:
+  module: dagster.core.storage.event_log
+  class: SqliteEventLogStorage
+  config:
+    base_dir: C:\Users\Tyler\Documents\Projects\yFinance\logs
+
+schedule_storage:
+  module: dagster.core.storage.schedules
+  class: SqliteScheduleStorage
+  config:
+    base_dir: C:\Users\Tyler\Documents\Projects\yFinance\schedules
+

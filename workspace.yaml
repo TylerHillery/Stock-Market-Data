@@ -1,0 +1,4 @@
+load_from:
+  - python_file:
+      relative_path: StockData.py
+      attribute: stock_market_data_repository

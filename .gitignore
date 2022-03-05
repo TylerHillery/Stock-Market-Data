@@ -3,3 +3,11 @@ test.ipynb
 *.csv
 airbyte/
 credentials/
+tmp*/
+__pycache__/
+history/
+logs/
+schedules/
+.telemetry/
+storage*/
+helpful_cmds.txt
