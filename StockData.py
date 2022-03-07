@@ -7,7 +7,7 @@ import pandas_datareader as pdr
 from bs4 import BeautifulSoup
 from datetime import datetime
 from google.cloud import storage
-from dagster import job, op, schedule, repository
+from dagster import job, op, schedule, repository, RunRequest, ScheduleEvaluationContext,ScheduleDefinition
 from dagster_airbyte import airbyte_resource, airbyte_sync_op
 
 #Set Global google cloud variables
@@ -92,17 +92,13 @@ def stock_market_data_job():
     sync_quote_data(start_after=download_quote_data(snp500list))
     sync_price_data(start_after=download_price_data(snp500list))
 
-#creating schedule
-@schedule(
-    cron_schedule="30 15 * * 1-5",
+#create schedule
+stock_market_data_job_schedule = ScheduleDefinition(
+    cron_schedule="52 16 * * 1-5",
     job=stock_market_data_job,
     execution_timezone="US/Central",
 )
-def market_close_schedule(context):
-    date = context.scheduled_execution_time.strftime("%Y-%m-%d")
-    return {"ops": {"download_active_snp500_stocks": {"inputs": {"date": {"value": date}}}}}
-
-#creating repository
+#creating repository stock_market_data_repository
 @repository
 def stock_market_data_repository():
-    return [stock_market_data_job, market_close_schedule]
+    return [stock_market_data_job, stock_market_data_job_schedule]
