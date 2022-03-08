@@ -1,22 +1,24 @@
-#Importing Packages
-import pandas as pd
-import yfinance as yf
-import requests
-import os
-import pandas_datareader as pdr 
-from bs4 import BeautifulSoup
+#Importing Standard Lib Packages
 from datetime import datetime
-from google.cloud import storage
-from dagster import job, op, schedule, repository, RunRequest, ScheduleEvaluationContext,ScheduleDefinition
+import os
+import requests
+
+#Import 3rd party packages
+from bs4 import BeautifulSoup
+from dagster import job, op, repository,ScheduleDefinition
 from dagster_airbyte import airbyte_resource, airbyte_sync_op
+from google.cloud import storage
+import pandas as pd
+import pandas_datareader as pdr 
+import yfinance as yf
 
 #Set Global google cloud variables
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r"C:\Users\Tyler\Documents\Projects\yFinance\credentials\python_credentials.json" # Only need this if you're running this code locally.
 client = storage.Client()
 bucket = client.get_bucket('yfinance_stock_data')
 
-
 #Get a list of the active S&P 500 Companies
+#Parsing from wikipedia table
 @op
 def download_active_snp500_stocks():
     wikiurl = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
@@ -46,7 +48,7 @@ def download_price_data(snp500list):
     for ticker in snp500list:
         #Getting YTD price data for each ticker in the list of snp500 tickers
         priceData = yf.download(ticker, period="ytd",interval='1d', group_by="Ticker")
-        priceData['ticker'] = ticker  # add this column because the dataframe doesn't contain a column with the ticker
+        priceData['ticker'] = ticker  #add this column because the dataframe doesn't contain a column with the ticker
         priceDataList.append(priceData)
 
     # combine all dataframes into a single dataframe
@@ -85,6 +87,7 @@ sync_snp500_companies = airbyte_sync_op.configured({"connection_id": "735bbf5c-d
 sync_price_data = airbyte_sync_op.configured({"connection_id": "7f0f03ce-7372-4367-a879-a788209dca69"}, name="sync_price_data")
 sync_quote_data = airbyte_sync_op.configured({"connection_id": "42ccc796-fd44-48e1-b7a1-eb640e5b1ff1"}, name="sync_quote_data")
 
+#Creating Dagster job
 @job(resource_defs={"airbyte": my_airbyte_resource})
 def stock_market_data_job():
     snp500list = download_active_snp500_stocks()
@@ -92,13 +95,13 @@ def stock_market_data_job():
     sync_quote_data(start_after=download_quote_data(snp500list))
     sync_price_data(start_after=download_price_data(snp500list))
 
-#create schedule
+#create schedule to run dagster job
 stock_market_data_job_schedule = ScheduleDefinition(
     cron_schedule="30 15 * * 1-5",
     job=stock_market_data_job,
     execution_timezone="US/Central",
 )
-#creating repository stock_market_data_repository
+#creating dagster repository
 @repository
 def stock_market_data_repository():
     return [stock_market_data_job,stock_market_data_job_schedule]
