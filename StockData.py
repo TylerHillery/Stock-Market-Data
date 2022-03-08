@@ -93,12 +93,12 @@ def stock_market_data_job():
     sync_price_data(start_after=download_price_data(snp500list))
 
 #create schedule
-# stock_market_data_job_schedule = ScheduleDefinition(
-#     cron_schedule="05 17 * * 1-5",
-#     job=stock_market_data_job,
-#     execution_timezone="US/Central",
-# )
+stock_market_data_job_schedule = ScheduleDefinition(
+    cron_schedule="30 15 * * 1-5",
+    job=stock_market_data_job,
+    execution_timezone="US/Central",
+)
 #creating repository stock_market_data_repository
 @repository
 def stock_market_data_repository():
-    return [stock_market_data_job]
+    return [stock_market_data_job,stock_market_data_job_schedule]
