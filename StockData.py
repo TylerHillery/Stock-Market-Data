@@ -13,7 +13,7 @@ import pandas_datareader as pdr
 import yfinance as yf
 
 #Set Global google cloud variables
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r"C:\Users\Tyler\Documents\Projects\yFinance\credentials\python_credentials.json" # Only need this if you're running this code locally.
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r"C:/Users/Tyler/Documents/Projects/yFinance/credentials/python_credentials.json" # Only need this if you're running this code locally.
 client = storage.Client()
 bucket = client.get_bucket('yfinance_stock_data')
 
