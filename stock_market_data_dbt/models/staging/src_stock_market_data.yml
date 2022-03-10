@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw_stock_market_data
+    database: stockmarketdata-342902
+    schema: StockMarketData
+    tables:
+      - name: raw_SnP500_companies
+      - name: raw_stock_price_data
+      - name: raw_quote_price_data
