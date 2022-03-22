@@ -4,7 +4,7 @@
 
 select
     cast(CIK as int) as CIK,
-    regexp_replace(Symbol, r'\.', r'-') as symbol,
+    regexp_replace(Symbol, r'\.', r'-') as ticker,
     security as security_name,
     Headquarters_Location as headquarters_location,
     GICS_sector,
