@@ -30,7 +30,8 @@ select
     companies.region,
     companies.exchange,
     companies.market_cap,
-    (close_price - prev.previous_day_close)/prev.previous_day_close as one_day_percent_change
+    (close_price - prev.previous_day_close)/prev.previous_day_close as one_day_percent_change,
+    ((close_price - prev.previous_day_close)/prev.previous_day_close) * (companies.market_cap / (SUM(companies.market_cap) OVER (PARTITION BY price.price_date))) * 10000 AS attribution
 from {{ ref('stg_stock_price_data') }} as price
 left join {{ ref('dim_companies') }} as companies
     on price.ticker = companies.ticker
