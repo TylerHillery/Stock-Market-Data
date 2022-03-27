@@ -1,12 +1,15 @@
 #Importing Standard Lib Packages
 from datetime import datetime
 import os
+from tracemalloc import start
 import requests
 
 #Import 3rd party packages
 from bs4 import BeautifulSoup
 from dagster import job, op, repository,ScheduleDefinition
+from dagster.utils import file_relative_path
 from dagster_airbyte import airbyte_resource, airbyte_sync_op
+from dagster_dbt import dbt_cli_resource, dbt_run_op
 from google.cloud import storage
 import pandas as pd
 import pandas_datareader as pdr 
@@ -87,14 +90,44 @@ sync_snp500_companies = airbyte_sync_op.configured({"connection_id": "735bbf5c-d
 sync_price_data = airbyte_sync_op.configured({"connection_id": "7f0f03ce-7372-4367-a879-a788209dca69"}, name="sync_price_data")
 sync_quote_data = airbyte_sync_op.configured({"connection_id": "42ccc796-fd44-48e1-b7a1-eb640e5b1ff1"}, name="sync_quote_data")
 
-#Creating Dagster job
-@job(resource_defs={"airbyte": my_airbyte_resource})
-def stock_market_data_job():
-    snp500list = download_active_snp500_stocks()
-    sync_snp500_companies(start_after=snp500list) 
-    sync_quote_data(start_after=download_quote_data(snp500list))
-    sync_price_data(start_after=download_price_data(snp500list))
+#Setting up dbt resource
+DBT_PROFILES_DIR = r"C:/Users/Tyler/.dbt"
+DBT_PROJECT_DIR = r"C:/Users/Tyler/Documents/Projects/yFinance/stock_market_data_dbt"
 
+my_dbt_resource = dbt_cli_resource.configured(
+    {"profiles_dir": DBT_PROFILES_DIR, "project_dir": DBT_PROJECT_DIR}
+)
+
+#Establish dbt models
+stg_snp500_companies = dbt_run_op.alias(name="stg_snp500_companies")
+stg_stock_quote_data = dbt_run_op.alias(name="stg_stock_quote_data")
+stg_stock_price_data = dbt_run_op.alias(name="stg_stock_price_data")
+dim_companies = dbt_run_op.alias(name="dim_companies")
+dim_GICS = dbt_run_op.alias(name="dim_GICS")
+fct_price_data = dbt_run_op.alias(name="fct_price_data")
+
+#Creating Dagster job
+@job(
+    resource_defs={
+        "airbyte": my_airbyte_resource,
+        "dbt": my_dbt_resource
+    }
+)
+def stock_market_data_job():
+    #Get list of active snp500 stocks
+    snp500list = download_active_snp500_stocks()
+    #Airbyte syncs
+    snp500_companies = sync_snp500_companies(start_after=snp500list) 
+    quote_data = sync_quote_data(start_after=download_quote_data(snp500list))
+    price_data = sync_price_data(start_after=download_price_data(snp500list))
+    #Run staging dbt models
+    snp500_companies = stg_snp500_companies(start_after=snp500_companies)
+    quote_data = stg_stock_quote_data(start_after=quote_data)
+    price_data = stg_stock_price_data(start_after=price_data)
+    #Run rest of dbt models
+    snp500_companies = dim_companies(start_after=[snp500_companies,quote_data])
+    gics = dim_GICS(start_after=snp500_companies)
+    fct_price_data(start_after=[gics,price_data])
 #create schedule to run dagster job
 stock_market_data_job_schedule = ScheduleDefinition(
     cron_schedule="30 15 * * 1-5",
