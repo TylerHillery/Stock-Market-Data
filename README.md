@@ -9,7 +9,7 @@ After the data is retrieved I export the pandas data frames to CSV files on Goog
 
 ### **[Dashboard](https://0b99782f.us2a.app.preset.io:443/r/3)**
 
-<img src="Assets\dashboard.jpg" alt="Dashboard"  width="650" height ="400"/>
+<img src="Assets\Dashboard.jpg" alt="Dashboard"  width="650" height ="400"/>
 
 ### **Data Pipeline Overview**
   <img src="Assets\stock-market-data-pipeline.png" alt="pipeline"  width="650" height="400"/>
