@@ -14,6 +14,9 @@ After the data is retrieved I export the pandas data frames to CSV files on Goog
 ### **Data Pipeline Overview**
   <img src="Assets\stock-market-data-pipeline.png" alt="pipeline"  width="650" height="400"/>
 
+### **Dagster UI** 
+  <img src="Assets\dagster_UI.jpg" alt="pipeline"  width="650" height="400"/>
 
-
+### **Airbyte UI** 
+<img src="Assets\airbyte_UI.jpg" alt="pipeline"  width="650" height="400"/>
 
