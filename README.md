@@ -5,7 +5,7 @@ Currently the pipeline is set up to retrieve data from companies in the S&P 500 
 
 After I get an active list of S&P500 companies I used [yfinance](https://github.com/ranaroussi/yfinance ) to retrieve YTD price information & [pandas_datareader](https://pandas-datareader.readthedocs.io/en/latest/readers/yahoo.html) to get current quote information which provided me with additional data about the company like market cap. Originally I tried to use yfiance's .info method but was having issues when retrieving data for a large list of stocks. 
 
-After the data is retrieved I export the pandas data frames to CSV files on Google Cloud Storage. [Dagster](https://github.com/dagster-io/dagster) then triggers my [Airbyte](https://github.com/airbytehq/airbyte) connection to load the files into tables onto BigQuery. Once the files are loaded my dbt models are then ran to transform the data. After dbt is done my dashboard is refreshed & the pipeline is complete!
+After the data is retrieved I export the pandas data frames to CSV files on Google Cloud Storage. [Dagster](https://github.com/dagster-io/dagster) then triggers my [Airbyte](https://github.com/airbytehq/airbyte) connection to load the files into BigQuery. Once the files are loaded my dbt models are then ran to transform the data. After dbt is done my dashboard is refreshed & the pipeline is complete!
 
 ### **Dashboard**
 
