@@ -7,9 +7,9 @@ After I get an active list of S&P500 companies I used [yfinance](https://github.
 
 After the data is retrieved I export the pandas data frames to CSV files on Google Cloud Storage. [Dagster](https://github.com/dagster-io/dagster) then triggers my [Airbyte](https://github.com/airbytehq/airbyte) connection to load the files into tables onto BigQuery. Once the files are loaded my dbt models are then ran to transform the data. After dbt is done my dashboard is refreshed & the pipeline is complete!
 
-### **[Dashboard](https://0b99782f.us2a.app.preset.io:443/r/3)**
+### [**Dashboard**](https://0b99782f.us2a.app.preset.io/superset/dashboard/8/?native_filters_key=7qP2z5wPWzwEPRJnUvWAuXeQz49023zaN3B8spzImGS_8FT4MGjSELX_ikGaSOI3&standalone=1)
 
-<a href="https://0b99782f.us2a.app.preset.io:443/r/3" target="_blank"> <img src="Assets\Dashboard.jpg" alt="Dashboard"  width="650" height ="400"/> </a>
+<a href="https://0b99782f.us2a.app.preset.io/superset/dashboard/8/?native_filters_key=7qP2z5wPWzwEPRJnUvWAuXeQz49023zaN3B8spzImGS_8FT4MGjSELX_ikGaSOI3&standalone=1" target="_blank"> <img src="Assets\Dashboard.jpg" alt="Dashboard"  width="650" height ="400"/> </a>
 
 ### **Data Pipeline Overview**
   <img src="Assets\stock-market-data-pipeline.png" alt="pipeline"  width="650" height="400"/>
