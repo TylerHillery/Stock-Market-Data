@@ -10,7 +10,14 @@ select
     GICS_sector,
     GICS_sub_industry,
     cast(left(Founded,4) as int) as year_founded,
-    parse_date('%Y-%m-%d', left(Date_first_added,10)) as date_first_added,
+    -- To-do handle exceptions where date_first_added only has year
+    parse_date('%Y-%m-%d', 
+        case 
+            when length(date_first_added) = 4 then 
+                concat(date_first_added,'-01-01')    
+            else
+                left(Date_first_added,10)
+        end) as date_first_added,
     _airbyte_ab_id,
     _airbyte_emitted_at,
     _airbyte_normalized_at,
